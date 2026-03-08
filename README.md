@@ -1,10 +1,14 @@
-# Cuba News (RSS de Periódico Cubano)
+# NewsHub (RSS por país)
 
-Aplicación web sencilla (FastAPI + SQLite + Jinja2) que muestra las noticias más recientes de Cuba usando **únicamente** el RSS oficial de Periódico Cubano:
-
-- https://www.periodicocubano.com/feed/
+Aplicación web sencilla (FastAPI + SQLite + Jinja2) que agrega noticias por país usando RSS públicos.
 
 No usa IA, OpenAI ni APIs de pago.
+
+## Fuentes RSS
+
+- Cuba: https://www.periodicocubano.com/feed/
+- Venezuela: https://elpepazo.com/rss/latest-posts
+- España: https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/espana/portada
 
 ## Requisitos
 
@@ -42,11 +46,17 @@ Luego abre:
 
 - http://localhost:10000/
 
+La portada incluye tres pestañas (Cuba / Venezuela / España) y también puedes filtrar por querystring:
+
+- `/?country=cuba`
+- `/?country=venezuela`
+- `/?country=espana`
+
 ## Cómo funciona la actualización automática (scheduler)
 
 - En el arranque:
   - Se crean las tablas en SQLite si no existen.
-  - Si la base de datos está vacía, se hace una **carga inicial** desde el RSS.
+  - Si la base de datos está vacía, se hace una **carga inicial** consultando las 3 fuentes.
 - En segundo plano:
   - Un scheduler (APScheduler) consulta el RSS **cada 30 minutos**.
   - Inserta solo noticias nuevas (la URL es única, evita duplicados).
@@ -56,6 +66,7 @@ Luego abre:
 - `app/main.py`: inicializa FastAPI, monta estáticos, arranque/parada del scheduler.
 - `app/routes/news.py`: página principal (búsqueda + paginación).
 - `app/services/rss_service.py`: descarga/parseo del RSS y guardado en DB.
+- `app/models/source.py`: tabla `sources` (name, rss_url, country, active).
 - `app/services/scheduler.py`: job cada 30 minutos.
 - `app/database/database.py`: conexión a SQLite y `init_db()`.
 - `app/models/news.py`: modelo SQLAlchemy `News`.

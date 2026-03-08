@@ -10,17 +10,38 @@ router = APIRouter()
 TEMPLATES_DIR = Path(__file__).resolve().parents[1] / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
+COUNTRIES = [
+    {"key": "cuba", "label": "Cuba"},
+    {"key": "venezuela", "label": "Venezuela"},
+    {"key": "espana", "label": "España"},
+]
+
+COUNTRY_KEY_TO_LABEL = {c["key"]: c["label"] for c in COUNTRIES}
+COUNTRY_LABELS = set(COUNTRY_KEY_TO_LABEL.values())
+
 @router.get("/")
 def read_news(
     request: Request,
+    country: str = Query("cuba", description="Country filter"),
     q: str = Query(None, description="Search query for news titles"),
     page: int = Query(1, description="Page number", ge=1),
     db: Session = Depends(get_db)
 ):
     limit = 12
     offset = (page - 1) * limit
+
+    # Accept both key (espana) and label (España) for compatibility
+    if country in COUNTRY_KEY_TO_LABEL:
+        country_key = country
+        country_label = COUNTRY_KEY_TO_LABEL[country]
+    elif country in COUNTRY_LABELS:
+        country_label = country
+        country_key = next((k for k, v in COUNTRY_KEY_TO_LABEL.items() if v == country_label), "cuba")
+    else:
+        country_key = "cuba"
+        country_label = COUNTRY_KEY_TO_LABEL[country_key]
     
-    query = db.query(News)
+    query = db.query(News).filter(News.country == country_label)
     
     if q:
         # Search by title
@@ -41,4 +62,8 @@ def read_news(
         "page": page,
         "total_pages": total_pages,
         "q": q or ""
+        ,
+        "country": country_key,
+        "country_label": country_label,
+        "countries": COUNTRIES,
     })

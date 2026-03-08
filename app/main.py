@@ -6,8 +6,9 @@ from fastapi.staticfiles import StaticFiles
 
 from app.database.database import SessionLocal, init_db
 from app.models.news import News
+from app.models.source import Source  # noqa: F401
 from app.routes.news import router as news_router
-from app.services.rss_service import fetch_and_store_news
+from app.services.rss_service import ensure_default_sources, fetch_and_store_all_sources
 from app.services.scheduler import start_scheduler, stop_scheduler
 
 logging.basicConfig(
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 
-app = FastAPI(title="Cuba News (Periódico Cubano RSS)")
+app = FastAPI(title="News Aggregator (RSS por país)")
 
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 app.include_router(news_router)
@@ -32,10 +33,9 @@ def on_startup() -> None:
     # Initial load if DB is empty
     db = SessionLocal()
     try:
-        existing_count = db.query(News.id).limit(1).count()
-        if existing_count == 0:
-            logger.info("Database empty; running initial RSS fetch")
-            fetch_and_store_news(db)
+        ensure_default_sources(db)
+        logger.info("Running RSS update for all sources on startup")
+        fetch_and_store_all_sources(db)
     except Exception:
         logger.exception("Startup initial fetch failed")
     finally:

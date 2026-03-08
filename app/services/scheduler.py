@@ -1,5 +1,5 @@
 from apscheduler.schedulers.background import BackgroundScheduler
-from app.services.rss_service import fetch_and_store_news
+from app.services.rss_service import fetch_and_store_all_sources
 from app.database.database import SessionLocal
 import logging
 
@@ -8,7 +8,8 @@ logger = logging.getLogger(__name__)
 def job_fetch_news():
     db = SessionLocal()
     try:
-        fetch_and_store_news(db)
+        inserted = fetch_and_store_all_sources(db)
+        logger.info("Scheduler ingest finished: %s new items", inserted)
     except Exception:
         logger.exception("Scheduler job failed")
     finally:

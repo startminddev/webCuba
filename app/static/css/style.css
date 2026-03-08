@@ -37,6 +37,30 @@ a:hover { text-decoration: underline; }
   background: #fff;
 }
 
+.country-tabs {
+  display: flex;
+  gap: 10px;
+  padding: 0 0 12px 0;
+  flex-wrap: wrap;
+}
+
+.tab {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-weight: 600;
+  background: #fff;
+}
+
+.tab:hover {
+  background: #f8fafc;
+}
+
+.tab.active {
+  background: #f1f5f9;
+}
+
 .header-container {
   display: flex;
   gap: 12px;
@@ -134,6 +158,12 @@ main.container {
   font-size: 12px;
   color: var(--muted);
   margin-bottom: 10px;
+}
+
+.news-source {
+  font-size: 12px;
+  color: var(--muted);
+  margin: -6px 0 10px 0;
 }
 
 .news-summary {

@@ -4,27 +4,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Noticias - Periódico Cubano</title>
+    <title>Noticias - Agregador por país</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 
 <body>
     <header class="app-header">
         <div class="container header-container">
-            <h1 class="logo">Cubano<span>News</span></h1>
+            <h1 class="logo">News<span>Hub</span></h1>
             <form class="search-form" method="get" action="/">
+                <input type="hidden" name="country" value="{{ country }}">
                 <input type="text" name="q" value="{{ q }}" placeholder="Buscar por titular..."
                     aria-label="Buscar noticias">
                 <button type="submit" class="btn-search">Buscar</button>
             </form>
+        </div>
+
+        <div class="container country-tabs" role="navigation" aria-label="País">
+            {% for c in countries %}
+            <a class="tab {% if c.key == country %}active{% endif %}" href="/?country={{ c.key }}{% if q %}&q={{ q }}{% endif %}">{{ c.label }}</a>
+            {% endfor %}
         </div>
     </header>
 
     <main class="container">
         {% if q %}
         <div class="search-results-info">
-            <p>Mostrando resultados para: <strong>"{{ q }}"</strong></p>
-            <a href="/" class="clear-search">Limpiar búsqueda</a>
+            <p>Mostrando resultados en <strong>{{ country_label }}</strong> para: <strong>"{{ q }}"</strong></p>
+            <a href="/?country={{ country }}" class="clear-search">Limpiar búsqueda</a>
         </div>
         {% endif %}
 
@@ -42,6 +49,10 @@
                         item.created_at.strftime('%d %b %Y, %H:%M') }}
                     </time>
 
+                    {% if item.source_name %}
+                    <div class="news-source">Fuente: {{ item.source_name }}</div>
+                    {% endif %}
+
                     {% if item.summary %}
                     <p class="news-summary">{{ item.summary | truncate(150, true, '...') }}</p>
                     {% endif %}
@@ -58,12 +69,12 @@
         {% if total_pages > 1 %}
         <nav class="pagination" aria-label="Paginación">
             {% if page > 1 %}
-            <a href="/?page={{ page - 1 }}{% if q %}&q={{ q }}{% endif %}" class="btn-page">&laquo; Anterior</a>
+            <a href="/?country={{ country }}&page={{ page - 1 }}{% if q %}&q={{ q }}{% endif %}" class="btn-page">&laquo; Anterior</a>
             {% endif %}
 
             <span class="page-info">Página {{ page }} de {{ total_pages }}</span>
 
-            {% if page < total_pages %} <a href="/?page={{ page + 1 }}{% if q %}&q={{ q }}{% endif %}" class="btn-page">
+            {% if page < total_pages %} <a href="/?country={{ country }}&page={{ page + 1 }}{% if q %}&q={{ q }}{% endif %}" class="btn-page">
                 Siguiente &raquo;</a>
                 {% endif %}
         </nav>
@@ -84,8 +95,7 @@
 
     <footer class="app-footer">
         <div class="container">
-            <p>Las noticias son obtenidas del <a href="https://www.periodicocubano.com/feed/" target="_blank"
-                    rel="noopener noreferrer">feed RSS oficial de Periódico Cubano</a>.</p>
+            <p>Fuentes RSS: Periódico Cubano (Cuba), El Pepazo (Venezuela), El País - España.</p>
             <p>Esta aplicación es un MVP no oficial y gratuito.</p>
         </div>
     </footer>

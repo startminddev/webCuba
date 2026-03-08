@@ -11,3 +11,6 @@ class News(Base):
     summary = Column(Text, nullable=True)
     published_date = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    country = Column(String(50), index=True, nullable=True)
+    source_name = Column(String(100), index=True, nullable=True)
